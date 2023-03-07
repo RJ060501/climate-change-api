@@ -1,4 +1,4 @@
-const PORT = 8000
+const PORT = process.env.PORT || 8000
 const express = require('express')
 const axios = require('axios')
 const cheerio = require('cheerio')
@@ -53,7 +53,7 @@ app.get('/news', (req, res) => {
     res.json(articles)
 })
 
-app.get('/news/:newspaperID', async (req, res) => {
+app.get('/news/:newspaperID', (req, res) => {
     const newspaperID = req.params.newspaperID
 
     const newspaperAddress = newspapers.filter(newspaper => newspaper.name === newspaperID)[0].address
