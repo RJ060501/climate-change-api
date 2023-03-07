@@ -2,6 +2,7 @@ const PORT = 8000
 const express = require('express')
 const axios = require('axios')
 const cheerio = require('cheerio')
+// const { attr } = require('cheerio/lib/api/attributes')
 
 const app = express()
 
@@ -53,7 +54,28 @@ app.get('/news', (req, res) => {
 })
 
 app.get('/news/:newspaperID', async (req, res) => {
-    console.log(req)
+    const newspaperID = req.params.newspaperID
+
+    const newspaperAddress = newspapers.filter(newspaper => newspaper.name === newspaperID)[0].address
+    const newspaperBase = newspapers.filter(newspaper => newspaper.name == newspaperID)[0].base
+
+    axios.get(newspaperAddress)
+        .then(response => {
+            const html = response.data
+            const $ = cheerio.load(html)
+            const specificArticles = []
+
+            $('a:contains("climate")', html).each(function () {
+                const title = $(this).text()
+                const url = $(this).attr('href')
+                specificArticles.push({
+                    title,
+                    url: newspaperBase + url,
+                    source: newspaperID
+                })
+            })
+            res.json(specificArticles)
+        }).catch(err => console.log(err))
 })
 
 app.listen(PORT, () => console.log(`server running on PORT ${PORT}`))
